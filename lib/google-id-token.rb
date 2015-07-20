@@ -63,10 +63,12 @@ module GoogleIDToken
     #   The required audience value
     # @param [String] cid
     #   The optional client-id ("azp" field) value
+    # @param [Hash] options
+    #   Optional jwt gem options
     #
     # @return [Hash] The decoded ID token, or null
-    def check(token, aud, cid = nil)
-      case check_cached_certs(token, aud, cid)
+    def check(token, aud, cid = nil, options = {})
+      case check_cached_certs(token, aud, cid, options)
       when :valid
         @token
       when :problem
@@ -77,7 +79,7 @@ module GoogleIDToken
           @problem = 'Unable to retrieve Google public keys'
           nil
         else
-          case check_cached_certs(token, aud, cid)
+          case check_cached_certs(token, aud, cid, options)
           when :valid
             @token
           when :problem
@@ -95,14 +97,14 @@ module GoogleIDToken
     # tries to validate the token against each cached cert.
     # Returns :valid (sets @token) or :problem (sets @problem) or
     #  nil, which means none of the certs validated.
-    def check_cached_certs(token, aud, cid)
+    def check_cached_certs(token, aud, cid, options = {})
       @problem = @token = nil
 
       # find first public key that validates this token
       @certs.detect do |key, cert|
         begin
           public_key = cert.public_key
-          @token = JWT.decode(token, public_key, !!public_key)
+          @token = JWT.decode(token, public_key, !!public_key, options)
           @token = @token.first if @token.kind_of?(Array)
 
           # in Feb 2013, the 'cid' claim became the 'azp' claim per changes
