@@ -27,7 +27,7 @@ describe GoogleIDToken::Validator do
   it 'should successfully validate against a passed-in X509 cert' do
     cert = OpenSSL::X509::Certificate.new(@literal_cert)
     literal_validator = GoogleIDToken::Validator.new( :x509_cert => cert )
-    jwt = literal_validator.check(@token_for_literal, @aud_for_literal)
+    jwt = literal_validator.check(@token_for_literal, @aud_for_literal, nil, verify_expiration: false)
     jwt.should_not == nil
     jwt['aud'].should == @aud_for_literal
   end
@@ -45,7 +45,7 @@ describe GoogleIDToken::Validator do
     FakeWeb::register_uri(:get, CERTS_URI,
                           :status => ["200", "Success"],
                           :body => @certs_body)
-    jwt = @old_skool_validator.check(@good_token, @token_aud, @token_cid)
+    jwt = @old_skool_validator.check(@good_token, @token_aud, @token_cid, verify_expiration: false)
     jwt.should_not == nil
     jwt['aud'].should == @token_aud
     jwt['cid'].should == @token_cid
@@ -57,7 +57,7 @@ describe GoogleIDToken::Validator do
                           :status => ["200", "Success"],
                           :body => @certs_body)
     bad_token = @good_token.gsub('x', 'y')
-    jwt = @old_skool_validator.check(bad_token, @token_aud, @token_cid)
+    jwt = @old_skool_validator.check(bad_token, @token_aud, @token_cid, verify_expiration: false)
     jwt.should == nil
     @old_skool_validator.problem.should =~ /not verified/
   end
@@ -66,7 +66,7 @@ describe GoogleIDToken::Validator do
     FakeWeb::register_uri(:get, CERTS_URI,
                           :status => ["200", "Success"],
                           :body => @certs_body)
-    jwt = @old_skool_validator.check(@good_token, @token_aud + 'x', @token_cid)
+    jwt = @old_skool_validator.check(@good_token, @token_aud + 'x', @token_cid, verify_expiration: false)
     jwt.should == nil
     @old_skool_validator.problem.should =~ /audience mismatch/
   end
@@ -75,7 +75,7 @@ describe GoogleIDToken::Validator do
     FakeWeb::register_uri(:get, CERTS_URI,
                           :status => ["200", "Success"],
                           :body => @certs_body)
-    jwt = @old_skool_validator.check(@good_token, @token_aud, @token_cid + 'x')
+    jwt = @old_skool_validator.check(@good_token, @token_aud, @token_cid + 'x', verify_expiration: false)
     jwt.should == nil
     @old_skool_validator.problem.should =~ /client-id mismatch/
   end
@@ -84,7 +84,7 @@ describe GoogleIDToken::Validator do
     FakeWeb::register_uri(:get, CERTS_URI,
                           :status => ["200", "Success"],
                           :body => @nf_token_certs_body)
-    jwt = @old_skool_validator.check(@new_fields_token, @nf_token_aud, @nf_token_azp)
+    jwt = @old_skool_validator.check(@new_fields_token, @nf_token_aud, @nf_token_azp, verify_expiration: false)
     jwt.should_not == nil
     jwt['aud'].should == @nf_token_aud
     jwt['cid'].should == @nf_token_azp
