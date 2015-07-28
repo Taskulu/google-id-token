@@ -13,7 +13,12 @@ Creating a new validator takes a single optional hash argument. If the hash has 
 === Examples
 
   validator = GoogleIDToken::Validator.new
-  jwt = validator.check(token, required_audience, optional_client_id, optional_jwt_gem_options)
+  jwt = validator.check(
+    token:   token,
+    aud:     required_audience,
+    cid:     optional_client_id,
+    options: optional_hash_of_jwt_gem_options
+  )
   if jwt
     email = jwt['email']
   else
@@ -23,7 +28,12 @@ Creating a new validator takes a single optional hash argument. If the hash has 
 
   cert = OpenSSL::X509::Certificate.new(File.read('my-cert.pem'))
   validator = GoogleIDToken::Validator.new(:x509_cert => cert)
-  jwt = validator.check(token, required_audience, required_client_id, optional_jwt_gem_options)
+  jwt = validator.check(
+    token:   token,
+    aud:     required_audience,
+    cid:     required_client_id,
+    options: optional_hash_of_jwt_gem_options
+  )
   if jwt
     email = jwt['email']
   else
