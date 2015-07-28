@@ -67,7 +67,7 @@ module GoogleIDToken
     #   Optional jwt gem options
     #
     # @return [Hash] The decoded ID token, or null
-    def check(token, aud, cid = nil, options = {})
+    def check(token:, aud:, cid: nil, options: {})
       case check_cached_certs(token, aud, cid, options)
       when :valid
         @token
